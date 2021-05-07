@@ -1,8 +1,8 @@
 from django.db.models.expressions import F as BaseF, Value as BaseValue, Func, Expression
-from django.utils import six
 from django.contrib.postgres.fields.array import IndexTransform
 from django.utils.functional import cached_property
 from django.db.models.lookups import Transform
+import six
 
 class OperatorMixin(object):
     CAT = '||'

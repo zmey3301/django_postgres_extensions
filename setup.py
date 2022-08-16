@@ -11,7 +11,7 @@ setup(name='django-postgres-extensions-ng',
     url='https://github.com/ifanrx/django_postgres_extensions',
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=[
-        'Django>=3.2',
+        'Django>=4.0',
         'six'
     ],
     classifiers=[

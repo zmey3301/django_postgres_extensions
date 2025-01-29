@@ -1,16 +1,16 @@
 from django.contrib.postgres import fields
 from django.contrib.postgres.forms import SplitArrayField as SplitArrayFormField
+from django.db.backends.postgresql.psycopg_any import Jsonb
+from django.db.models import JSONField as DjangoJSONField
 from django.forms.fields import TypedMultipleChoiceField
-from psycopg2.extras import Json
 from django_postgres_extensions.forms.fields import NestedFormField
-from django_postgres_extensions.models.expressions import F, Value as V
+from django_postgres_extensions.models.expressions import F, Value
 from django_postgres_extensions.models.functions import HStore, Delete, ArrayRemove
 from django_postgres_extensions.models.sql.updates import UpdateArrayByIndex
 from django.core import exceptions
 
 
 class ArrayField(fields.ArrayField):
-
     def __init__(self, base_field, form_size=None, **kwargs):
         super(ArrayField, self).__init__(base_field, **kwargs)
         self.form_size = form_size
@@ -84,8 +84,8 @@ class ArrayField(fields.ArrayField):
         })
         return name, path, args, kwargs
 
-class HStoreField(fields.HStoreField):
 
+class HStoreField(fields.HStoreField):
     def __init__(self, fields=(), keys=(), max_value_length=25, require_all_fields=False, **kwargs):
         super(HStoreField, self).__init__(**kwargs)
         self.fields = fields
@@ -100,7 +100,7 @@ class HStoreField(fields.HStoreField):
             values = list(value.values())
             if lookup == '':
                 values = [str(v) for v in value.values()]
-            return F(self.name).cat(HStore(V(keys), V(values)))
+            return F(self.name).cat(HStore(Value(keys), Value(values)))
         if lookup == 'del':
             return Delete(self.name, value)
         raise ValueError('Update lookup type %s not found for field %s' % (lookup, self.name))
@@ -119,8 +119,8 @@ class HStoreField(fields.HStoreField):
             defaults = kwargs
         return super(HStoreField, self).formfield(**defaults)
 
-class JSONField(fields.JSONField):
 
+class JSONField(DjangoJSONField):
     def __init__(self, fields=(), require_all_fields=False, **kwargs):
         super(JSONField, self).__init__(**kwargs)
         self.fields = fields
@@ -129,12 +129,12 @@ class JSONField(fields.JSONField):
     def get_update_type(self, lookups, value):
         lookup = lookups[0]
         if lookup == '':
-            return F(self.name).cat(V(Json(value)))
+            return F(self.name).cat(Value(Jsonb(value)))
         if lookup == 'del':
             if '__' in value:
                 values = value.split('__')
-                return F(self.name).delete(V(values))
-            return F(self.name) - V(value)
+                return F(self.name).delete(Value(values))
+            return F(self.name) - Value(value)
         raise ValueError('Update lookup type %s not found for field %s' % (lookup, self.name))
 
     def formfield(self, **kwargs):

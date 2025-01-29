@@ -1,11 +1,13 @@
 from __future__ import unicode_literals, absolute_import
 
-from django.test import TestCase
-from .models import Product
-from django_postgres_extensions.models.functions import *
-from django_postgres_extensions.models.expressions import Key
-from psycopg2.extras import Json
 from django.db import transaction
+from django.db.backends.postgresql.psycopg_any import Jsonb
+from django.test import TestCase
+
+from django_postgres_extensions.models.expressions import Key
+from django_postgres_extensions.models.functions import *
+from .models import Product
+
 
 class JSONIndexTests(TestCase):
 
@@ -82,14 +84,14 @@ class JSONFuncTests(TestCase):
 
     def test_jsonb_set(self):
         with transaction.atomic():
-            self.queryset.update(description = JSONBSet('description', ['Details', 'Genre'], Json('Heavy Metal'), True))
+            self.queryset.update(description = JSONBSet('description', ['Details', 'Genre'], Jsonb('Heavy Metal'), True))
         obj = self.queryset.get()
         self.assertDictEqual(obj.description,
                              {'Price': 9.99, 'Industry': 'Music', 'Details': {'Genre': 'Heavy Metal', 'Release': 'Album', 'Rating': 8}, 'Tags': ['Heavy', 'Guitar']})
 
     def test_jsonb_array_set(self):
         with transaction.atomic():
-            self.queryset2.update(description=JSONBSet('description', ['1', 'c'], Json('g')))
+            self.queryset2.update(description=JSONBSet('description', ['1', 'c'], Jsonb('g')))
         obj = self.queryset2.get()
         self.assertListEqual(obj.description,
                              [{'a': 'b', 'c': 'd'}, {'a': 'e', 'c': 'g'}])

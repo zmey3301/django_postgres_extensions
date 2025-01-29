@@ -46,9 +46,9 @@ Check the postgresql documentation for more information on these functions.
 These functions handle the arguments by converting them to the correct expressions automatically::
 
     from django_postgres_extensions.models.functions import *
-    from psycopg2.extras import Json
-    obj = Product.objects.update(description = JSONBSet('description', ['Details', 'Genre'], Json('Heavy Metal'), True))
-    obj = Product.objects.update(description = JSONBSet('description', ['1', 'c'], Json('g')))
+    from django.db.backends.postgresql.psycopg_any import Jsonb
+    obj = Product.objects.update(description = JSONBSet('description', ['Details', 'Genre'], Jsonb('Heavy Metal'), True))
+    obj = Product.objects.update(description = JSONBSet('description', ['1', 'c'], Jsonb('g')))
     obj = Product.objects.queryset.annotate(tags_length=JSONBArrayLength('tags', 1)).get()
 
 Use With NestedFormField

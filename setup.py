@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 import django_postgres_extensions
 
-setup(name='django-postgres-extensions-ng',
+setup(name='django-postgres-extensions',
     version=django_postgres_extensions.__version__,
     description="Extra features for django.contrib.postgres",
     long_description=open('description.rst').read(),
-    author='ifanr',
-    author_email='ifanrx@ifanr.com',
-    url='https://github.com/ifanrx/django_postgres_extensions',
+    author='SoulString',
+    author_email='mike@soulstring.io',
+    url='https://github.com/zmey3301/django_postgres_extensions',
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=[
         'Django>=4.0',

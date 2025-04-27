@@ -1,7 +1,8 @@
 from django.db.backends.postgresql.base import DatabaseWrapper as BaseDatabaseWrapper
-from .schema import DatabaseSchemaEditor
-from .creation import DatabaseCreation
+
 from .operations import DatabaseOperations
+from .schema import DatabaseSchemaEditor
+
 
 class DatabaseWrapper(BaseDatabaseWrapper):
 
@@ -9,7 +10,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
-        self.creation = DatabaseCreation(self)
         self.ops = DatabaseOperations(self)
 
         self.any_operators = {

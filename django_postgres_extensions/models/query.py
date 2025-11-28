@@ -6,38 +6,17 @@ from .sql import UpdateQuery
 import copy
 
 
-
-def update(self, **kwargs):
-    """
-    Updates all elements in the current QuerySet, setting all the given
-    fields to the appropriate values.
-    """
-    assert self.query.can_filter(), \
-        "Cannot update a query once a slice has been taken."
-    self._for_write = True
-    query = self.query.chain(UpdateQuery)
-    query.add_update_values(kwargs)
-    with transaction.atomic(using=self.db, savepoint=False):
-        rows = query.get_compiler(self.db).execute_sql(CURSOR)
-    self._result_cache = None
-    return rows
-update.alters_data = True
-
-
-def _update(self, values):
+def _update(self, values, returning_fields=None):
     """
     A version of update that accepts field objects instead of field names.
     Used primarily for model saving and not intended for use by general
     code (it requires too much poking around at model internals to be
     useful at that level).
     """
-    assert self.query.can_filter(), \
-        "Cannot update a query once a slice has been taken."
-    query = self.query.chain(UpdateQuery)
-    values = [value for value in values if not getattr(value[0], 'many_to_many_array', False)]
-    query.add_update_fields(values)
-    self._result_cache = None
-    return query.get_compiler(self.db).execute_sql(CURSOR)
+
+    values = [value for value in values if not getattr(value[0], 'many_to_many_array', False)]    
+    return super()._update(values, returning_fields)
+
 _update.alters_data = True
 _update.queryset_only = False
 

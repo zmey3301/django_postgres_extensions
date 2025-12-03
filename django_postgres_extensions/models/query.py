@@ -1,12 +1,14 @@
-from django.db import transaction
 from django.core import exceptions
+from django.db.models import query
 from django.db.models.constants import LOOKUP_SEP
-from django.db.models.sql.constants import CURSOR
-from .sql import UpdateQuery
 import copy
 
+# Keep a handle to Django's original implementation so we can delegate after
+# stripping our custom array values.
+_django_queryset_update = query.QuerySet._update
 
-def _update(self, values, returning_fields=None):
+
+def _update(self, values):
     """
     A version of update that accepts field objects instead of field names.
     Used primarily for model saving and not intended for use by general
@@ -14,11 +16,13 @@ def _update(self, values, returning_fields=None):
     useful at that level).
     """
 
-    values = [value for value in values if not getattr(value[0], 'many_to_many_array', False)]    
-    return super()._update(values, returning_fields)
+    values = [value for value in values if not getattr(value[0], 'many_to_many_array', False)]
+    return _django_queryset_update(self, values)
+
 
 _update.alters_data = True
 _update.queryset_only = False
+
 
 def format(self, field, expression, output_field=None, *args, **kwargs):
     if not output_field:
@@ -26,6 +30,7 @@ def format(self, field, expression, output_field=None, *args, **kwargs):
     kwargs = {output_field: expression(field, *args, **kwargs)}
     qs = self.defer(field).annotate(**kwargs)
     return qs
+
 
 def prefetch_one_level(instances, prefetcher, lookup, level):
     """
